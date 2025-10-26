@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Histórico</h1>
+
+<form method="get" action="/history/">
+  <input type="text" name="q" placeholder="Buscar..." value="{{ q|default:'' }}">
+  <input type="text" name="model" placeholder="Modelo" value="{{ model|default:'' }}">
+  <input type="text" name="session_id" placeholder="Session ID" value="{{ session_id|default:'' }}">
+  <input type="hidden" name="page_size" value="{{ page_size }}">
+  <button type="submit">Filtrar</button>
+</form>
+
+<p>Total: {{ total }}</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Session</th>
+      <th>Modelo</th>
+      <th>Prompt</th>
+      <th>Resposta</th>
+      <th>Latência (s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for it in items %}
+    <tr>
+      <td>{{ it.created_at }}</td>
+      <td>{{ it.session_id }}</td>
+      <td>{{ it.model }}</td>
+      <td><pre>{{ it.prompt }}</pre></td>
+      <td><pre>{{ it.response }}</pre></td>
+      <td>{{ it.latency_seconds|floatformat:2 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">Nenhum registro.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="pagination">
+  {% with total_pages=total|add:page_size|divisibleby:page_size %}
+  {% endwith %}
+  {% if page > 1 %}
+    <a href="?q={{ q }}&model={{ model }}&session_id={{ session_id }}&page={{ page|add:-1 }}&page_size={{ page_size }}">Anterior</a>
+  {% endif %}
+  <span>Página {{ page }}</span>
+  {% if total > page|add:0|mul:page_size %}
+    <a href="?q={{ q }}&model={{ model }}&session_id={{ session_id }}&page={{ page|add:1 }}&page_size={{ page_size }}">Próxima</a>
+  {% endif %}
+</div>
+
+<p>Exportar:
+  <a href="/export/?format=csv&session_id={{ session_id }}&model={{ model }}&q={{ q }}">CSV</a> |
+  <a href="/export/?format=json&session_id={{ session_id }}&model={{ model }}&q={{ q }}">JSON</a>
+</p>
+
+{% endblock %}

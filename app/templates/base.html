@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Django HF-ML</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/">Chat</a> |
+      <a href="/history/">Histórico</a>
+    </nav>
+  </header>
+  <main>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

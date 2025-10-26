@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Chat com Transformers</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Enviar</button>
+</form>
+
+{% if response_text %}
+  <h2>Resposta</h2>
+  <pre>{{ response_text }}</pre>
+  <p>Tempo de processamento: {{ latency|floatformat:2 }}s</p>
+{% endif %}
+
+{% endblock %}
