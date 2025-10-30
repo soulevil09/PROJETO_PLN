@@ -137,7 +137,7 @@ MONGO_DB_NAME=django_hf_ml
 MONGO_COLLECTION=interactions  
   
 # Hugging Face / Transformers  
-HF_MODEL=google/flan-t5-small  
+HF_MODEL=google/flan-t5-large  
 HF_TASK=text2text-generation  
 HF_API_TOKEN=  
   
