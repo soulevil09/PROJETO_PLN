@@ -1,16 +1,43 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chatbot de PLN{% endblock %}
+
 {% block content %}
-<h1>Chat com Transformers</h1>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Enviar</button>
-</form>
+<div class="chat-container">
+    <h1 class="mb-4 text-center">Interaja com o Modelo de PLN</h1>
 
-{% if response_text %}
-  <h2>Resposta</h2>
-  <pre>{{ response_text }}</pre>
-  <p>Tempo de processamento: {{ latency|floatformat:2 }}s</p>
-{% endif %}
+    <!-- Formulário de Chat -->
+    <form method="post" class="mb-5 p-4 border rounded bg-light">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="{{ form.prompt.id_for_label }}" class="form-label">Seu Prompt:</label>
+            {{ form.prompt }}
+            {% if form.prompt.errors %}<div class="text-danger">{{ form.prompt.errors }}</div>{% endif %}
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="{{ form.max_new_tokens.id_for_label }}" class="form-label">Máx. Tokens:</label>
+                {{ form.max_new_tokens }}
+            </div>
+            <div class="col-md-6">
+                <label for="{{ form.temperature.id_for_label }}" class="form-label">Temperatura:</label>
+                {{ form.temperature }}
+            </div>
+        </div>
 
+        <button type="submit" class="btn btn-primary w-100">Gerar Resposta</button>
+    </form>
+
+    <!-- Exibição da Resposta -->
+    {% if response_text %}
+        <div class="mt-4 response-card">
+            <p class="text-muted small mb-1">Latência: **{{ latency|floatformat:2 }}s** | ID da Sessão: {{ session_id|slice:":8" }}...</p>
+            <h5 class="text-primary">Resposta do Modelo:</h5>
+            <pre>{{ response_text }}</pre>
+        </div>
+    {% endif %}
+
+</div>
 {% endblock %}

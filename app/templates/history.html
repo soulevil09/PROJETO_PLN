@@ -1,59 +1,78 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Histórico de Interações{% endblock %}
+
 {% block content %}
-<h1>Histórico</h1>
+<h1 class="mb-4">Histórico de Interações</h1>
 
-<form method="get" action="/history/">
-  <input type="text" name="q" placeholder="Buscar..." value="{{ q|default:'' }}">
-  <input type="text" name="model" placeholder="Modelo" value="{{ model|default:'' }}">
-  <input type="text" name="session_id" placeholder="Session ID" value="{{ session_id|default:'' }}">
-  <input type="hidden" name="page_size" value="{{ page_size }}">
-  <button type="submit">Filtrar</button>
-</form>
-
-<p>Total: {{ total }}</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Data</th>
-      <th>Session</th>
-      <th>Modelo</th>
-      <th>Prompt</th>
-      <th>Resposta</th>
-      <th>Latência (s)</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for it in items %}
-    <tr>
-      <td>{{ it.created_at }}</td>
-      <td>{{ it.session_id }}</td>
-      <td>{{ it.model }}</td>
-      <td><pre>{{ it.prompt }}</pre></td>
-      <td><pre>{{ it.response }}</pre></td>
-      <td>{{ it.latency_seconds|floatformat:2 }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="6">Nenhum registro.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<div class="pagination">
-  {% with total_pages=total|add:page_size|divisibleby:page_size %}
-  {% endwith %}
-  {% if page > 1 %}
-    <a href="?q={{ q }}&model={{ model }}&session_id={{ session_id }}&page={{ page|add:-1 }}&page_size={{ page_size }}">Anterior</a>
-  {% endif %}
-  <span>Página {{ page }}</span>
-  {% if total > page|add:0|mul:page_size %}
-    <a href="?q={{ q }}&model={{ model }}&session_id={{ session_id }}&page={{ page|add:1 }}&page_size={{ page_size }}">Próxima</a>
-  {% endif %}
+<div class="mb-4 p-3 border rounded bg-light">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label for="id_q" class="form-label">Buscar (Prompt/Resposta):</label>
+            <input type="text" name="q" id="id_q" class="form-control" value="{{ q|default:'' }}">
+        </div>
+        <div class="col-md-3">
+            <label for="id_session_id" class="form-label">ID da Sessão:</label>
+            <input type="text" name="session_id" id="id_session_id" class="form-control" value="{{ session_id|default:'' }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+        </div>
+        <div class="col-md-3 text-end">
+            <a href="{% url 'export_view' %}?format=csv&session_id={{ session_id|default:'' }}&q={{ q|default:'' }}" class="btn btn-outline-secondary btn-sm">Exportar CSV</a>
+            <a href="{% url 'export_view' %}?format=json&session_id={{ session_id|default:'' }}&q={{ q|default:'' }}" class="btn btn-outline-secondary btn-sm">Exportar JSON</a>
+        </div>
+    </form>
 </div>
 
-<p>Exportar:
-  <a href="/export/?format=csv&session_id={{ session_id }}&model={{ model }}&q={{ q }}">CSV</a> |
-  <a href="/export/?format=json&session_id={{ session_id }}&model={{ model }}&q={{ q }}">JSON</a>
-</p>
+{% if items %}
+    <p class="text-muted">Total de interações encontradas: **{{ total }}**</p>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover history-table">
+            <thead>
+                <tr>
+                    <th scope="col">Data/Hora</th>
+                    <th scope="col">Modelo</th>
+                    <th scope="col">Latência (s)</th>
+                    <th scope="col">Prompt</th>
+                    <th scope="col">Resposta</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ item.model }}</td>
+                    <td>{{ item.latency_seconds|floatformat:2 }}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.prompt }}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.response }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page > 1 %}
+                <li class="page-item"><a class="page-link" href="?page={{ page|add:"-1" }}&session_id={{ session_id|default:'' }}&q={{ q|default:'' }}">Anterior</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+            {% endif %}
+
+            {% if total > page|mul:page_size %}
+                <li class="page-item"><a class="page-link" href="?page={{ page|add:"1" }}&session_id={{ session_id|default:'' }}&q={{ q|default:'' }}">Próxima</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+{% else %}
+    <div class="alert alert-info" role="alert">
+        Nenhuma interação encontrada com os filtros atuais.
+    </div>
+{% endif %}
 
 {% endblock %}
