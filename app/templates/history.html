@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load app_tags %}  {# <-- Ótimo, você já tinha isso! #}
 
 {% block title %}Histórico de Interações{% endblock %}
 
@@ -61,11 +62,14 @@
                 <li class="page-item disabled"><span class="page-link">Anterior</span></li>
             {% endif %}
 
-            {% if total > page|mul:page_size %}
-                <li class="page-item"><a class="page-link" href="?page={{ page|add:"1" }}&session_id={{ session_id|default:'' }}&q={{ q|default:'' }}">Próxima</a></li>
-            {% else %}
-                <li class="page-item disabled"><span class="page-link">Próxima</span></li>
-            {% endif %}
+            
+            {% with limite_de_itens_pagina=page|mul:page_size %}
+                {% if total > limite_de_itens_pagina %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page|add:"1" }}&session_id={{ session_id|default:'' }}&q={{ q|default:'' }}">Próxima</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+                {% endif %}
+            {% endwith %}
         </ul>
     </nav>
 

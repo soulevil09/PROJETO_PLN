@@ -26,7 +26,7 @@ class NLPService:
                 cls._tokenizer = AutoTokenizer.from_pretrained(model_name)
                 
                 model_args = {
-                    "device_map": "auto",
+                    "device_map": "cpu",
                     "offload_folder": "offload_cache"
                 }
 
